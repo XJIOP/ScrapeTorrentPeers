@@ -4,7 +4,7 @@ Scrape torrents peers from tracker announces and DHT.
 **Key features**  
 - Scrape peers from tracker announces
 - Scrape peers from DHT
-- Uptime stats
+- Requests and uptime stats
 
 ## How to use
 
