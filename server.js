@@ -272,7 +272,8 @@ function runClient(infoHash) {
 	var client = new Client(clientOpts);
 	
 	session[infoHash].client = client;
-	
+	session[infoHash].announce.count = clientOpts.announce.length;
+
 	client.on('error', function(err) {
 		log('Tracker client error', err);
 		checkEndAnnounce(infoHash);
@@ -365,8 +366,7 @@ function checkEndDHT(infoHash, lookup) {
 		session[infoHash].ips.count--;
 		
 	log('Check end DHT count', session[infoHash].ips.count);
-	
-	
+		
 	if(!session[infoHash].lookup && session[infoHash].ips.count == 0) {
     	session[infoHash].app.send('{"seeders":'+session[infoHash].stats.seeders+',"leechers":'+session[infoHash].stats.leechers+',"downloads":-1}');
     	delete session[infoHash];
