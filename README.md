@@ -1,17 +1,28 @@
-# ScrapeTorrentPeers
-Scrape torrents peers from tracker announces and DHT.
-
 **Key features**  
 - Scrape peers from tracker announces
 - Scrape peers from DHT
 - Requests and uptime stats
 
-## How to use
+## How it works
 
 Scrape peers from DHT occurs only if seeders are not found from tracker announces.  
 If you only want scrape from DHT, leave announce_list param empty.
 
-## Request URLs
+## Setup
+
+Edit server.js to change the configuration
+```json
+accessKey = 'qwerty';
+appPort = 8585;
+peerPort = 6889;
+scrapeTimeout = 10;
+```
+
+Run scrape server
+```json
+node server.js
+```
+## Requests to scrape server
 
 /scrape?access_key=&info_hash=&announce_list=
 ```json
