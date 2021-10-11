@@ -8,16 +8,16 @@ Scrape torrents peers from tracker announces and DHT.
 
 ## How to use
 
-Scrape peers from DHT occurs only if peers are not found from tracker announces.  
+Scrape peers from DHT occurs only if seeders are not found from tracker announces.  
 If you only want scrape from DHT, leave announce_list param empty.
 
 ## Request URLs
 
-/scrape?access_key=&info_hash=&pieces_length=&announce_list=
+/scrape?access_key=&info_hash=&announce_list=
 ```json
-{"seeders":103,"leechers":88,"downloads":91}
+{"seeders":103,"leechers":88}
 ```
 /stats?access_key=
 ```json
-{"dht":3328,"tracker":16105,"active":0,"pending":0,"last_access":"7/21/2020, 2:23:38 PM","uptime":"7: days, 18: hours, 25: minutes, 38: seconds"}
+{"tracker":59,"dht":12,"active":0,"errors":0,"last_access":"11.10.2021 17:7:10","started":"11.10.2021 16:45:0","uptime":"0 days 0 hours 22 minutes 10 seconds"}
 ```

@@ -1,12 +1,12 @@
 <?php
 
-# http://localhost:8585/stats?access_key=qwerty
+# http://localhost:8585/stats?access_key=
 
-$scrape_url = "http://localhost";
-$scrape_port = 8585;
+$app_url = "http://localhost";
+$app_port = 8585;
 $access_key = "qwerty";
 
-$request = $scrape_url.":".$scrape_port."/stats?access_key=".$access_key;
+$request = "$app_url:$app_port/stats?access_key=$access_key";
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $request);
