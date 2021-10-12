@@ -1,5 +1,5 @@
 **Key features**  
-- Scrape peers from tracker announces
+- Scrape peers from trackers
 - Scrape peers from DHT
 - Requests and uptime stats
 
