@@ -1,47 +1,60 @@
-const scrapeTracker = require('./tracker.js');
-const scrapeDht = require('./dht.js');
+const tracker = require('./tracker.js');
+const dht = require('./dht.js');
 
-const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout) => {
-    return new Promise((resolve, reject) => {
+const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, scrape_type) => {
+    return new Promise(async (resolve, reject) => {
         //console.log('getPeers');
 
-        scrapeTracker(info_hash, tracker_list, peer_id, peer_port, scrape_timeout)
-        .then(async data => {
-            //console.log('data', data);
+        try {
 
-            let seeders = data.seeders;
-            let leechers = data.leechers;
+            let result = {
+                'peers': {'seeders': 0, 'leechers': 0},
+                'scrape': {'tracker': false, 'dht': false}
+            };
 
-            let is_tracker = tracker_list.length ? true : false;
-            let is_dht = !seeders ? true : false;
+            // scrape from tracker
+            if(tracker_list.length && (scrape_type == 'auto' || scrape_type == 'tracker' || scrape_type == 'both')) {
 
-            // by no seeders run dht
-            if (is_dht) {
-
-                await scrapeDht(info_hash, peer_id, peer_port, scrape_timeout)
+                await tracker(info_hash, tracker_list, peer_id, peer_port, scrape_timeout)
                 .then(data => {
-                    //console.log('data', data);
+                    //console.log('data from tracker', data);
 
-                    if (data.seeders > seeders)
-                        seeders = data.seeders;
+                    result.scrape.tracker = true;
 
-                    if (data.leechers > leechers)
-                        leechers = data.leechers;
+                    result.peers.seeders = data.seeders;
+                    result.peers.leechers = data.leechers;
                 })
                 .catch(err => {
                     //console.error('error', err);
                 });
             }
 
-			let result = {'tracker': is_tracker, 'dht': is_dht, 'scrape': {'seeders': seeders, 'leechers': leechers}};
-			//console.log('result', result);
+            // scrape from dht
+            if((scrape_type == 'auto' && !result.peers.seeders) || scrape_type == 'dht' || scrape_type == 'both') {
 
+                await dht(info_hash, peer_id, peer_port, scrape_timeout)
+                .then(data => {
+                    //console.log('data from dht', data);
+
+                    result.scrape.dht = true;
+
+                    if(data.seeders > result.peers.seeders)
+                        result.peers.seeders = data.seeders;
+
+                    if(data.leechers > result.peers.leechers)
+                        result.peers.leechers = data.leechers;
+                })
+                .catch(err => {
+                    //console.error('error', err);
+                });
+            }
+
+            //console.log('result', result);
             resolve(result);
-        })
-        .catch(err => {
-			//console.error('error', err);
+        }
+        catch(err) {
             reject(err);
-        });
+        }
     });
 }
 

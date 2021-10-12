@@ -2,15 +2,14 @@ const Tracker = require('bittorrent-tracker');
 
 const trackerScrape = (info_hash, trackers, peer_id, peer_port, scrape_timeout) => {
 	return new Promise((resolve, reject) => {
-        //console.log('trackerScrape');
+        console.log('trackerScrape');
         //console.log('trackers', trackers);
 
         let result = {'seeders': 0, 'leechers': 0};
 
         if (!trackers.length) {
             //console.log('no trackers');
-            resolve(result);
-            return;
+            return reject(result);
         }
 
         try {
@@ -84,8 +83,8 @@ const trackerScrape = (info_hash, trackers, peer_id, peer_port, scrape_timeout) 
             }, 1000);
         }
         catch(err) {
-            //console.log('error', err);
-            resolve(result);
+            //console.error('error', err);
+            reject(err);
         }
     });
 }

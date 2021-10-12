@@ -10,8 +10,10 @@ const appPort = 8585;
 const peerId = createPeerId('-UT1800-');
 const peerPort = Math.floor(Math.random() * (9000 - 1000) + 1000); // random port
 const scrapeTimeout = 10; // seconds
+const scrapeType = 'auto'; // auto, tracker, dht, both
 
 const stats = {tracker: 0, dht: 0, active: 0, errors: 0, last_access: '--', started: Date.now()};
+const types = ['auto', 'tracker', 'dht', 'both'];
 const session = [];
 
 app.use(router);
@@ -23,8 +25,9 @@ app.use(function(req, res) {
 
 /*
  * GET REQUEST: /scrape?access_key=&info_hash=&announce_list=
- * access_key = (string)
- * info_hash = (string)
+ * access_key = (string) (required)
+ * scrape_type = (string) (auto, tracker, dht, both)
+ * info_hash = (string) (required)
  * announce_list = (json array without index)
  *
  */
@@ -36,15 +39,14 @@ router.get('/scrape', function(req, res) {
 		return;
 	}
 
+    let scrape_type = types.includes(req.query.scrape_type) ? scrape_type : scrapeType;
 	let info_hash = req.query.info_hash;
 	let announce_list = [];
 
     try {
         announce_list = JSON.parse(req.query.announce_list);
     }
-    catch(err) {
-        //console.error('announce_list', err);
-    }
+    catch(err) {}
 
 	if (info_hash == null) {
 		res.send('{"error":"missing info_hash"}');
@@ -63,17 +65,17 @@ router.get('/scrape', function(req, res) {
 
     session.push(info_hash);
 
-    scrape(info_hash, announce_list, peerId, peerPort, scrapeTimeout)
+    scrape(info_hash, announce_list, peerId, peerPort, scrapeTimeout, scrape_type)
     .then(data => {
         //console.log('data', data);
 
-        if (data.tracker) stats.tracker++;
-        if (data.dht) stats.dht++;
+        if (data.scrape.tracker) stats.tracker++;
+        if (data.scrape.dht) stats.dht++;
         stats.last_access = getDateTime();
 
         removeFromArray(session, info_hash);
 
-        res.send(data.scrape);
+        res.send(data.peers);
     })
     .catch(err => {
         //console.error('error', err);

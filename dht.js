@@ -146,13 +146,12 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
     return new Promise((resolve, reject) => {
         //console.log('dhtScrape');
 
+        let result = {'seeders': 0, 'leechers': 0};
+
         try {
 
             let client = new Client();
             client.setData(info_hash, peer_id, peer_port);
-
-            let seeders = 0;
-            let leechers = 0;
 
             let sec = 0;
 
@@ -160,8 +159,8 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
                 //console.log('sec', sec);
                 //console.log('peers', client.torrent.peers.length);
 
-                let seeds = 0;
-                let leechs = 0;
+                let seeders = 0;
+                let leechers = 0;
 
                 if (client.torrent.metadata && client.torrent.peers.length) {
 
@@ -170,27 +169,26 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
                         //console.log('peer pieces', peer.pieces);
 
 						if (peer.pieces === client.torrent.metadata.pieces.length)
-                            seeds++;
+                            seeders++;
 						else
-                            leechs++;
+                            leechers++;
                     });
 
-                    if(seeds > seeders)
-                        seeders = seeds;
+                    if(seeders > result.seeders)
+                        result.seeders = seeders;
 
-                    if(leechs > leechers)
-                        leechers = leechs;
+                    if(leechers > result.leechers)
+                        result.leechers = leechers;
                 }
 
-                //console.log('seeds: ' + seeds + ', seeders: ' + seeders);
-                //console.log('leechs: ' + leechs + ', leechers: ' + leechers);
+                //console.log('seeders: ' + seeders + ', result: ' + result.seeders);
+                //console.log('leechers: ' + leechers + ', result: ' + result.leechers);
 
                 // wait to first seeders but not less 3 sec or timeout
-                if((seeders && sec >= 3) || sec == scrape_timeout) {
-                    destroyPeers(client.torrent.peers);
+                if((result.seeders && sec >= 3) || sec == scrape_timeout) {
                     client.torrent.discovery.destroy();
+                    destroyPeers(client.torrent.peers);
                     client.DHT.destroy(() => {
-                        let result = {'seeders': seeders, 'leechers': leechers};
                         resolve(result);
                     });
                 }
