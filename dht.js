@@ -131,13 +131,15 @@ class Peer {
     }
 }
 
-const peerDestroy = (peer) => {
-    try {
-        peer.wire.destroy()
-        peer.conn.end();
-        peer.conn.destroy();
-    }
-    catch(err) {}
+const destroyPeers = (peers) => {
+    peers.forEach((peer, i) => {
+        try {
+            peer.wire.destroy()
+            peer.conn.end();
+            peer.conn.destroy();
+        }
+        catch(err) {}
+    });
 }
 
 const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
@@ -149,45 +151,57 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
             let client = new Client();
             client.setData(info_hash, peer_id, peer_port);
 
+            let seeders = 0;
+            let leechers = 0;
+
             let sec = 0;
-            let intervalInstance = setInterval(() => {
+
+            const parsePeers = () => {
                 //console.log('sec', sec);
                 //console.log('peers', client.torrent.peers.length);
 
-                if ((client.torrent.metadata && client.torrent.peers.length) || sec == scrape_timeout) {
+                let seeds = 0;
+                let leechs = 0;
 
-                    clearInterval(intervalInstance);
-                    client.torrent.discovery.destroy();
-                    client.DHT.destroy();
-
-                    let seeders = 0;
-                    let leechers = 0;
+                if (client.torrent.metadata && client.torrent.peers.length) {
 
                     client.torrent.peers.forEach((peer, i) => {
                         //console.log('peer', i);
+                        //console.log('peer pieces', peer.pieces);
 
-                        if (peer) {
-                            //console.log('peer.pieces', peer.pieces);
-
-							if (client.torrent.metadata) {
-
-								if (peer.pieces === client.torrent.metadata.pieces.length)
-									seeders++;
-								else
-									leechers++;
-							}
-
-                            peerDestroy(peer);
-                        }
+						if (peer.pieces === client.torrent.metadata.pieces.length)
+                            seeds++;
+						else
+                            leechs++;
                     });
 
-					let result = {'seeders': seeders, 'leechers': leechers};
-                    resolve(result);
+                    if(seeds > seeders)
+                        seeders = seeds;
+
+                    if(leechs > leechers)
+                        leechers = leechs;
+                }
+
+                //console.log('seeds: ' + seeds + ', seeders: ' + seeders);
+                //console.log('leechs: ' + leechs + ', leechers: ' + leechers);
+
+                // wait to first seeders but not less 3 sec or timeout
+                if((seeders && sec >= 3) || sec == scrape_timeout) {
+                    destroyPeers(client.torrent.peers);
+                    client.torrent.discovery.destroy();
+                    client.DHT.destroy(() => {
+                        let result = {'seeders': seeders, 'leechers': leechers};
+                        resolve(result);
+                    });
+                }
+                else {
+                    setTimeout(parsePeers, 1000);
                 }
 
                 sec++;
+            }
 
-            }, 1000);
+            setTimeout(parsePeers, 1000);
         }
         catch(err) {
             //console.error('error', err);
