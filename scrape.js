@@ -8,7 +8,8 @@ const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, s
         try {
 
             let result = {
-                'peers': {'seeders': 0, 'leechers': 0},
+                'seeders': 0,
+                'leechers': 0,
                 'scrape': {'tracker': false, 'dht': false}
             };
 
@@ -21,8 +22,8 @@ const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, s
 
                     result.scrape.tracker = true;
 
-                    result.peers.seeders = data.seeders;
-                    result.peers.leechers = data.leechers;
+                    result.seeders = data.seeders;
+                    result.leechers = data.leechers;
                 })
                 .catch(err => {
                     //console.error('error', err);
@@ -30,7 +31,7 @@ const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, s
             }
 
             // scrape from dht
-            if((scrape_type == 'auto' && !result.peers.seeders) || scrape_type == 'dht' || scrape_type == 'both') {
+            if((scrape_type == 'auto' && !result.seeders) || scrape_type == 'dht' || scrape_type == 'both') {
 
                 await dht(info_hash, peer_id, peer_port, scrape_timeout)
                 .then(data => {
@@ -38,11 +39,11 @@ const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, s
 
                     result.scrape.dht = true;
 
-                    if(data.seeders > result.peers.seeders)
-                        result.peers.seeders = data.seeders;
+                    if(data.seeders > result.seeders)
+                        result.seeders = data.seeders;
 
-                    if(data.leechers > result.peers.leechers)
-                        result.peers.leechers = data.leechers;
+                    if(data.leechers > result.leechers)
+                        result.leechers = data.leechers;
                 })
                 .catch(err => {
                     //console.error('error', err);

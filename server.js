@@ -75,7 +75,7 @@ router.get('/scrape', function(req, res) {
 
         removeFromArray(session, info_hash);
 
-        res.send(data.peers);
+        res.send(data);
     })
     .catch(err => {
         //console.error('error', err);
