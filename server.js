@@ -39,7 +39,7 @@ router.get('/scrape', function(req, res) {
 		return;
 	}
 
-    let scrape_type = types.includes(req.query.scrape_type) ? scrape_type : scrapeType;
+    let scrape_type = types.includes(req.query.scrape_type) ? req.query.scrape_type : scrapeType;
 	let info_hash = req.query.info_hash;
 	let announce_list = [];
 
