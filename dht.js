@@ -142,7 +142,7 @@ const destroyPeers = (peers) => {
     });
 }
 
-const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
+const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout, dht_falsity) => {
     return new Promise((resolve, reject) => {
         //console.log('dhtScrape');
 
@@ -164,11 +164,15 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout) => {
 
                 if (client.torrent.metadata && client.torrent.peers.length) {
 
+                    let torrent_pieces = client.torrent.metadata.pieces.length;
+                    if(dht_falsity)
+                        torrent_pieces = torrent_pieces * (dht_falsity / 100);
+
                     client.torrent.peers.forEach((peer, i) => {
                         //console.log('peer', i);
                         //console.log('peer pieces', peer.pieces);
 
-						if (peer.pieces === client.torrent.metadata.pieces.length)
+						if (peer.pieces >= torrent_pieces)
                             seeders++;
 						else
                             leechers++;

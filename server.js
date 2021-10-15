@@ -11,6 +11,7 @@ const peerId = createPeerId('-UT1800-');
 const peerPort = Math.floor(Math.random() * (9000 - 1000) + 1000); // random port
 const scrapeTimeout = 10; // seconds
 const scrapeType = 'auto'; // auto, tracker, dht, both
+const dhtFalsity = 0; // percent (recommended no more than 1-3)
 
 const stats = {tracker: 0, dht: 0, active: 0, errors: 0, last_access: '--', started: Date.now()};
 const types = ['auto', 'tracker', 'dht', 'both'];
@@ -65,7 +66,7 @@ router.get('/scrape', function(req, res) {
 
     session.push(info_hash);
 
-    scrape(info_hash, announce_list, peerId, peerPort, scrapeTimeout, scrape_type)
+    scrape(info_hash, announce_list, peerId, peerPort, scrapeTimeout, scrape_type, dhtFalsity)
     .then(data => {
         //console.log('data', data);
 

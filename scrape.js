@@ -1,7 +1,7 @@
 const tracker = require('./tracker.js');
 const dht = require('./dht.js');
 
-const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, scrape_type) => {
+const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, scrape_type, dht_falsity) => {
     return new Promise(async (resolve, reject) => {
         //console.log('getPeers');
 
@@ -33,7 +33,7 @@ const getPeers = (info_hash, tracker_list, peer_id, peer_port, scrape_timeout, s
             // scrape from dht
             if((scrape_type == 'auto' && !result.seeders) || scrape_type == 'dht' || scrape_type == 'both') {
 
-                await dht(info_hash, peer_id, peer_port, scrape_timeout)
+                await dht(info_hash, peer_id, peer_port, scrape_timeout, dht_falsity)
                 .then(data => {
                     //console.log('data from dht', data);
 
