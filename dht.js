@@ -166,7 +166,7 @@ const dhtScrape = (info_hash, peer_id, peer_port, scrape_timeout, dht_falsity) =
 
                     let torrent_pieces = client.torrent.metadata.pieces.length;
                     if(dht_falsity)
-                        torrent_pieces = torrent_pieces * (dht_falsity / 100);
+                        torrent_pieces = torrent_pieces - (torrent_pieces * (dht_falsity / 100));
 
                     client.torrent.peers.forEach((peer, i) => {
                         //console.log('peer', i);
